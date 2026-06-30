@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifest for the SANDBOX manual build (framework-only Java twin of the
+  canonical Kotlin app). Built against the API-23 platform because that is the
+  only android.jar installable in the build environment. Functionally identical
+  to the Gradle project; differences are limited to API-23-safe choices:
+    - no networkSecurityConfig attr (that attr is API 24) -> cleartext is
+      enabled with usesCleartextTraffic + targetSdk 23 (cleartext default-on),
+      which still allows http to aarush-virtualbox.local and any LAN IP.
+    - framework Fullscreen theme instead of AppCompat.
+  minSdk 23 / targetSdk 23: installs on Android 6.0+ incl. the latest Android.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.vali.pilot"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
+        android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

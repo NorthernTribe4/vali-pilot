@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The live feed is plain HTTP on the LAN (no TLS), so cleartext traffic must be
+  allowed. base-config permits cleartext to ANY host, which covers both the
+  default mDNS hostname (aarush-virtualbox.local) and any raw LAN IP you might
+  type into the in-app address field as a fallback.
+
+  The explicit <domain-config> below documents the default target; it is
+  redundant with the permissive base-config but makes the intent obvious and
+  is the block to keep if you ever want to TIGHTEN this to named hosts only
+  (remove base-config, list each host/IP under domain-config).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">aarush-virtualbox.local</domain>
+        <!-- Add raw IP fallbacks here if you tighten base-config, e.g.: -->
+        <!-- <domain includeSubdomains="false">192.168.1.42</domain> -->
+    </domain-config>
+</network-security-config>

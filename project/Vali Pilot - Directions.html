@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vali Pilot — Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Spline+Sans+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Archivo", system-ui, sans-serif;
+    background: #e7e5df;
+    color: #1c2128;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    width: max-content;
+    min-width: 100%;
+    min-height: 100vh;
+    padding: 48px;
+    box-sizing: border-box;
+  }
+  .page-head { max-width: 760px; margin-bottom: 36px; }
+  .page-head .kicker {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: #8a8a82; margin: 0 0 10px;
+  }
+  .page-head h1 { font-size: 30px; margin: 0 0 10px; font-weight: 800; letter-spacing: -0.01em; }
+  .page-head p { margin: 0; font-size: 15px; line-height: 1.5; color: #55554e; max-width: 640px; }
+
+  .row { display: flex; gap: 56px; align-items: flex-start; }
+  .col { flex: none; width: 900px; }
+  .col-label {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px;
+  }
+  .col-label .idx {
+    font-family: "Spline Sans Mono", monospace; font-size: 12px;
+    letter-spacing: 0.2em; color: #a0a097;
+  }
+  .col-label h2 { font-size: 19px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .col-label .tag {
+    font-family: "Spline Sans Mono", monospace; font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #6a6a62; border: 1px solid #cfcdc4;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .col-note { font-size: 13.5px; line-height: 1.55; color: #57574f; margin: 0 0 18px; max-width: 820px; }
+  .col-note b { color: #2a2a24; font-weight: 700; }
+
+  /* device bezel */
+  .device {
+    width: 900px; height: 430px; border-radius: 26px;
+    background: #0a0d10; padding: 9px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2), 0 22px 50px rgba(20,24,28,.28);
+    position: relative;
+  }
+  .screen {
+    position: relative; width: 100%; height: 100%;
+    border-radius: 18px; overflow: hidden; background: #0d161c;
+  }
+
+  /* ===== camera scene (shared) ===== */
+  .cam { position: absolute; inset: 0; overflow: hidden; background: #0c141a; }
+  .cam .sky { position: absolute; inset: 0 0 42% 0; background: linear-gradient(180deg, #2a3b47 0%, #1b2a33 60%, #16242c 100%); }
+  .cam .bloom { position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(440px 200px at 28% 8%, rgba(150,180,200,.30), transparent 70%),
+      radial-gradient(380px 180px at 78% 0%, rgba(120,150,170,.22), transparent 70%);
+  }
+  .cam .floor { position: absolute; left: -25%; right: -25%; bottom: 0; height: 60%;
+    background: linear-gradient(180deg, #1d2b34 0%, #101b21 100%); }
+  .cam .floor::before { content: ""; position: absolute; inset: -10% 0 0 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(170,190,200,.10) 0 1px, transparent 1px 110px),
+      repeating-linear-gradient(0deg, rgba(170,190,200,.07) 0 1px, transparent 1px 90px);
+    transform: perspective(280px) rotateX(64deg); transform-origin: bottom center;
+  }
+  .cam .table {
+    position: absolute; left: 33%; top: 39%; width: 34%; height: 15%;
+    background: linear-gradient(180deg, #2974c0 0%, #1a5491 100%);
+    clip-path: polygon(20% 0, 80% 0, 100% 100%, 0% 100%);
+    box-shadow: 0 22px 44px rgba(0,0,0,.5);
+  }
+  .cam .table::before { content: ""; position: absolute; left: 12%; right: 12%; top: 46%; height: 2px;
+    background: rgba(255,255,255,.55); }
+  .cam .table::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
+    background: rgba(255,255,255,.32); }
+  .cam .ball { position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #ffffff, #dcded6 65%, #b7bab1);
+    box-shadow: 0 5px 7px rgba(0,0,0,.5); }
+  .cam .vig { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 42%, transparent 52%, rgba(4,8,11,.62) 100%); }
+  .cam .grain { position: absolute; inset: 0; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  /* ===== theme tokens ===== */
+  .dir-a {
+    --accent: #FF6A2B; --accent-ink: #2A0E03;
+    --ok: #2FBF71; --guide: rgba(255,255,255,.7);
+    --text: #F5F6F1; --muted: rgba(245,246,241,.55);
+    --rec: #FF5A5F;
+    --panel: rgba(11,26,40,.55); --panel-brd: rgba(255,255,255,.16);
+    --solid-panel: rgba(11,26,40,.92);
+    --stick-hi: rgba(40,70,98,.6); --stick-lo: rgba(11,26,40,.7);
+    --nub-hi: #2974c0; --nub-lo: #15446f; --nub-brd: rgba(255,255,255,.25);
+    --collect-hi: #FF8453; --collect-lo: #F0571B; --collect-glow: rgba(255,106,43,.5);
+  }
+  .dir-b {
+    --accent: #FFC400; --accent-ink: #1A1A0E;
+    --ok: #3FB6C9; --guide: rgba(255,196,0,.7);
+    --text: #ECEFEA; --muted: rgba(236,239,234,.5);
+    --rec: #E5484D;
+    --panel: rgba(17,21,26,.66); --panel-brd: rgba(236,239,234,.13);
+    --solid-panel: rgba(17,21,26,.94);
+    --stick-hi: rgba(42,50,59,.85); --stick-lo: rgba(17,21,26,.9);
+    --nub-hi: #3a434e; --nub-lo: #1c232b; --nub-brd: rgba(255,196,0,.35);
+    --collect-hi: #FFD23F; --collect-lo: #F0B400; --collect-glow: rgba(255,196,0,.45);
+  }
+
+  /* ===== HUD shell ===== */
+  .hud { position: absolute; inset: 0; pointer-events: none; }
+  .hud .interactive { pointer-events: auto; }
+  button { font-family: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* top bar */
+  .topbar { position: absolute; top: 0; left: 0; right: 0; height: 52px;
+    display: flex; align-items: center; gap: 14px; padding: 0 16px;
+    background: linear-gradient(180deg, rgba(6,11,15,.78), rgba(6,11,15,0)); }
+  .wordmark { display: flex; align-items: baseline; gap: 7px; }
+  .wordmark .mk {
+    font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 17px;
+    letter-spacing: 0.02em; color: #fff; }
+  .wordmark .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    transform: translateY(-1px); }
+  .wordmark .sub { font-family: "Spline Sans Mono", monospace; font-size: 9.5px;
+    letter-spacing: 0.22em; color: rgba(255,255,255,.5); text-transform: uppercase; }
+
+  .conn { display: flex; align-items: center; gap: 7px;
+    background: var(--panel); border: 1px solid var(--panel-brd); border-radius: 999px;
+    padding: 5px 12px 5px 9px; backdrop-filter: blur(6px); }
+  .conn .led { width: 8px; height: 8px; border-radius: 50%; background: var(--ok);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 26%, transparent); }
+  .conn .txt { font-family: "Spline Sans Mono", monospace; font-size: 11px; letter-spacing: .14em;
+    font-weight: 600; color: var(--text); text-transform: uppercase; }
+
+  .spacer { flex: 1; }
+
+  .telemetry { display: flex; align-items: center; gap: 0;
+    background: var(--panel); border: 1px solid var(--panel-brd); border-radius: 8px;
+    padding: 4px 4px; backdrop-filter: blur(6px); }
+  .telemetry .cell { display: flex; flex-direction: column; align-items: center; padding: 2px 13px; }
+  .telemetry .cell + .cell { border-left: 1px solid var(--panel-brd); }
+  .telemetry .val { font-family: "Spline Sans Mono", monospace; font-weight: 700; font-size: 16px;
+    color: var(--text); letter-spacing: .01em; font-variant-numeric: tabular-nums; line-height: 1.05; }
+  .telemetry .val small { font-size: 9.5px; font-weight: 600; color: var(--muted); letter-spacing: .1em; }
+  .telemetry .lab { font-family: "Spline Sans Mono", monospace; font-size: 8px; letter-spacing: .2em;
+    color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  .battery { display: flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--panel-brd); border-radius: 8px;
+    padding: 7px 11px; backdrop-filter: blur(6px); }
+  .batt-glyph { position: relative; width: 28px; height: 14px; border: 1.5px solid var(--text);
+    border-radius: 3px; }
+  .batt-glyph::after { content: ""; position: absolute; right: -4px; top: 3px; width: 2.5px; height: 6px;
+    background: var(--text); border-radius: 0 1px 1px 0; }
+  .batt-fill { position: absolute; left: 1.5px; top: 1.5px; bottom: 1.5px; width: 72%;
+    background: var(--ok); border-radius: 1px; }
+  .battery .pct { font-family: "Spline Sans Mono", monospace; font-size: 12px; font-weight: 700;
+    color: var(--text); font-variant-numeric: tabular-nums; }
+  .signal { display: flex; align-items: flex-end; gap: 2.5px; height: 15px; }
+  .signal i { width: 3.5px; background: var(--text); border-radius: 1px; opacity: .35; }
+  .signal i:nth-child(1){ height: 4px; } .signal i:nth-child(2){ height: 7px; }
+  .signal i:nth-child(3){ height: 10px; } .signal i:nth-child(4){ height: 14px; }
+  .signal i.on { opacity: 1; }
+
+  .gear { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--panel); border: 1px solid var(--panel-brd); backdrop-filter: blur(6px); }
+  .gear .dots { display: flex; gap: 3px; }
+  .gear .dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--text); opacity: .85; }
+  .gear:hover { border-color: var(--accent); }
+
+  /* IP popover */
+  .ipcard { position: absolute; top: 56px; right: 14px; width: 226px;
+    background: var(--solid-panel); border: 1px solid var(--panel-brd); border-radius: 12px;
+    padding: 14px; backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right;
+    transition: opacity .16s, transform .16s; pointer-events: none; }
+  .ipcard.open { opacity: 1; transform: none; pointer-events: auto; }
+  .ipcard .h { font-family: "Spline Sans Mono", monospace; font-size: 10px; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
+  .ipcard input { width: 100%; background: rgba(0,0,0,.35); border: 1px solid var(--panel-brd);
+    border-radius: 7px; padding: 9px 10px; color: var(--text); font-family: "Spline Sans Mono", monospace;
+    font-size: 13px; letter-spacing: .04em; }
+  .ipcard input:focus { outline: none; border-color: var(--accent); }
+  .ipcard .mirror { display: flex; align-items: center; justify-content: space-between; margin-top: 11px; }
+  .ipcard .mirror span { font-size: 12px; color: var(--text); }
+  .toggle { width: 38px; height: 22px; border-radius: 999px; background: rgba(255,255,255,.16);
+    position: relative; transition: background .16s; }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+    border-radius: 50%; background: #fff; transition: transform .16s; }
+  .toggle.on { background: var(--accent); } .toggle.on::after { transform: translateX(16px); }
+
+  /* ===== drive joystick (bottom-left) ===== */
+  .joystick { position: absolute; left: 30px; bottom: 28px; width: 138px; height: 138px;
+    border-radius: 50%; touch-action: none; }
+  .joystick .base { position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, var(--stick-hi), var(--stick-lo));
+    border: 1.5px solid var(--panel-brd); box-shadow: inset 0 2px 14px rgba(0,0,0,.5), 0 6px 18px rgba(0,0,0,.4);
+    backdrop-filter: blur(4px); }
+  .joystick .arrow { position: absolute; left: 50%; top: 50%; width: 0; height: 0; opacity: .5; }
+  .joystick .arrow.up { transform: translate(-50%, -56px); border-left: 6px solid transparent;
+    border-right: 6px solid transparent; border-bottom: 9px solid var(--text); }
+  .joystick .arrow.down { transform: translate(-50%, 47px); border-left: 6px solid transparent;
+    border-right: 6px solid transparent; border-top: 9px solid var(--text); }
+  .joystick .arrow.left { transform: translate(-58px, -50%); border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent; border-right: 9px solid var(--text); }
+  .joystick .arrow.right { transform: translate(48px, -50%); border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent; border-left: 9px solid var(--text); }
+  .joystick .nub { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px;
+    border-radius: 50%; background: radial-gradient(circle at 42% 34%, var(--nub-hi), var(--nub-lo));
+    border: 1px solid var(--nub-brd); box-shadow: 0 8px 16px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.3);
+    transition: transform .18s cubic-bezier(.2,.9,.3,1.3); }
+  .joystick.dragging .nub { transition: none; }
+  .joystick .label { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center;
+    font-family: "Spline Sans Mono", monospace; font-size: 9px; letter-spacing: .25em; color: var(--muted); }
+
+  /* ===== action cluster (bottom-right) ===== */
+  .actions { position: absolute; right: 28px; bottom: 26px; display: flex; align-items: flex-end; gap: 16px; }
+  .mini-col { display: flex; flex-direction: column; gap: 12px; }
+  .mini { width: 56px; height: 56px; border-radius: 16px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    background: var(--panel); border: 1px solid var(--panel-brd); backdrop-filter: blur(6px);
+    transition: transform .1s, background .12s; }
+  .mini:active { transform: scale(.93); }
+  .mini .ico { width: 18px; height: 18px; display: grid; place-items: center; }
+  .mini .mlab { font-family: "Spline Sans Mono", monospace; font-size: 7.5px; letter-spacing: .14em;
+    color: var(--muted); }
+  .snap-ico { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text); }
+  .snap-ico::after { content: ""; display: block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text); margin: 3.5px auto; }
+  .rec-ico { width: 13px; height: 13px; border-radius: 50%; background: var(--rec); }
+  .mini.recording .rec-ico { border-radius: 3px; animation: recpulse 1s steps(2,end) infinite; }
+  @keyframes recpulse { 50% { opacity: .25; } }
+  .mini.recording .mlab { color: var(--rec); }
+
+  .collect { position: relative; width: 96px; height: 96px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    background: radial-gradient(circle at 50% 36%, var(--collect-hi), var(--collect-lo));
+    box-shadow: 0 10px 26px var(--collect-glow), inset 0 1px 2px rgba(255,255,255,.35);
+    transition: transform .1s; }
+  .collect::before { content: ""; position: absolute; inset: -7px; border-radius: 50%;
+    border: 2px solid var(--accent); opacity: .55; }
+  .collect:active { transform: scale(.95); }
+  .collect.ping::after { content: ""; position: absolute; inset: -7px; border-radius: 50%;
+    border: 2px solid var(--accent); animation: ping .5s ease-out; }
+  @keyframes ping { from { transform: scale(1); opacity: .7; } to { transform: scale(1.4); opacity: 0; } }
+  .collect .mouth { width: 34px; height: 16px; background: var(--accent-ink);
+    clip-path: polygon(16% 0, 84% 0, 100% 100%, 0 100%); opacity: .9; }
+  .collect .clab { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 13px;
+    letter-spacing: .06em; color: var(--accent-ink); }
+
+  /* ===== RETICLE A — ball-lock (Centre Court) ===== */
+  .reticle { position: absolute; left: 50%; top: 47%; transform: translate(-50%,-50%); }
+  .ret-a { width: 172px; height: 172px; }
+  .ret-a .lock-ring { position: absolute; inset: 18px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.9); }
+  .ret-a .scan-ring { position: absolute; inset: 6px; border-radius: 50%;
+    border: 1.5px dashed rgba(255,255,255,.4); }
+  .ret-a.locked .scan-ring { border-color: var(--accent); }
+  .ret-a.locked .lock-ring { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .ret-a .tick { position: absolute; width: 14px; height: 14px; border: 2px solid #fff;
+    transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .ret-a .tick.tl { left: 8px; top: 8px; border-right: none; border-bottom: none; }
+  .ret-a .tick.tr { right: 8px; top: 8px; border-left: none; border-bottom: none; }
+  .ret-a .tick.bl { left: 8px; bottom: 8px; border-right: none; border-top: none; }
+  .ret-a .tick.br { right: 8px; bottom: 8px; border-left: none; border-top: none; }
+  .ret-a.locked .tick { border-color: var(--accent); }
+  .ret-a.locked .tick.tl { transform: translate(14px,14px); }
+  .ret-a.locked .tick.tr { transform: translate(-14px,14px); }
+  .ret-a.locked .tick.bl { transform: translate(14px,-14px); }
+  .ret-a.locked .tick.br { transform: translate(-14px,-14px); }
+  .ret-a .ball-dot { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px;
+    border-radius: 50%; background: radial-gradient(circle at 36% 30%, #fff, #d9dbd2 70%);
+    box-shadow: 0 0 0 0 rgba(255,255,255,0); transition: box-shadow .3s; }
+  .ret-a.locked .ball-dot { box-shadow: 0 0 14px 2px var(--accent); }
+  .ret-a .status-chip { position: absolute; left: 50%; top: -26px; transform: translateX(-50%);
+    font-family: "Spline Sans Mono", monospace; font-size: 10px; letter-spacing: .2em; white-space: nowrap;
+    color: #fff; background: var(--panel); border: 1px solid var(--panel-brd); padding: 3px 9px; border-radius: 5px;
+    backdrop-filter: blur(6px); }
+  .ret-a.locked .status-chip { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+
+  /* intake guide (shared, themed) */
+  .intake { position: absolute; left: 50%; bottom: -52px; transform: translateX(-50%);
+    width: 120px; }
+  .intake .mouth-shape { width: 100%; height: 22px; margin: 0 auto;
+    clip-path: polygon(22% 0, 78% 0, 100% 100%, 0% 100%);
+    border: 1.5px solid var(--guide); border-top: none;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--guide) 16%, transparent)); }
+  .intake.aligned .mouth-shape { border-color: var(--ok); background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ok) 22%, transparent)); }
+  .intake .track { position: relative; height: 4px; margin: 8px 12px 0; border-radius: 2px;
+    background: rgba(255,255,255,.18); }
+  .intake .track .center { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1.5px;
+    background: rgba(255,255,255,.5); transform: translateX(-50%); }
+  .intake .track .marker { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px;
+    border-radius: 50%; background: var(--guide); left: 50%; transition: left .12s linear, background .2s; }
+  .intake.aligned .track .marker { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  .intake .ilab { text-align: center; margin-top: 7px; font-family: "Spline Sans Mono", monospace;
+    font-size: 8.5px; letter-spacing: .22em; color: var(--muted); }
+  .intake.aligned .ilab { color: var(--ok); }
+
+  /* ===== RETICLE B — machined bracket (Service Robot) ===== */
+  .ret-b { width: 168px; height: 150px; }
+  .ret-b .bracket { position: absolute; width: 26px; height: 26px; border: 2.5px solid var(--accent); }
+  .ret-b .bracket.tl { left: 0; top: 0; border-right: none; border-bottom: none; }
+  .ret-b .bracket.tr { right: 0; top: 0; border-left: none; border-bottom: none; }
+  .ret-b .bracket.bl { left: 0; bottom: 0; border-right: none; border-top: none; }
+  .ret-b .bracket.br { right: 0; bottom: 0; border-left: none; border-top: none; }
+  .ret-b.locked .bracket { box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent); }
+  .ret-b .cross { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px; }
+  .ret-b .cross::before, .ret-b .cross::after { content: ""; position: absolute; background: var(--accent); }
+  .ret-b .cross::before { left: 50%; top: 0; bottom: 0; width: 1.5px; transform: translateX(-50%); }
+  .ret-b .cross::after { top: 50%; left: 0; right: 0; height: 1.5px; transform: translateY(-50%); }
+  .ret-b .range { position: absolute; right: 4px; top: -22px;
+    font-family: "Spline Sans Mono", monospace; font-weight: 700; font-size: 15px; color: var(--accent);
+    font-variant-numeric: tabular-nums; }
+  .ret-b .range small { font-size: 9px; opacity: .7; }
+  .ret-b .status-chip { position: absolute; left: 0; top: -22px;
+    font-family: "Spline Sans Mono", monospace; font-size: 10px; letter-spacing: .18em;
+    color: var(--accent); }
+  .ret-b.locked .status-chip::before { content: "● "; }
+  .ret-b .hazard { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
+    width: 64px; height: 5px; border-radius: 1px;
+    background: repeating-linear-gradient(45deg, var(--accent) 0 6px, #11151a 6px 12px); opacity: .8; }
+
+  .swatches { display: flex; gap: 0; margin-top: 20px; border-radius: 8px; overflow: hidden;
+    border: 1px solid #d4d2c9; width: max-content; }
+  .sw { width: 132px; padding: 12px 12px 11px; }
+  .sw .chip { width: 22px; height: 22px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); margin-bottom: 8px; }
+  .sw .nm { font-size: 11.5px; font-weight: 600; color: #2a2a24; }
+  .sw .hx { font-family: "Spline Sans Mono", monospace; font-size: 10px; color: #8a8a82; letter-spacing: .02em; margin-top: 1px; }
+
+  .hint { margin-top: 14px; font-family: "Spline Sans Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; color: #8a8a82; }
+  .hint b { color: #57574f; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <p class="kicker">Vali · Pilot View · Two Directions</p>
+    <h1>Driving Vali — pick a direction</h1>
+    <p>Same anatomy in both: full-bleed camera, top telemetry, centre ball-reticle (the signature), left analog stick, right Collect trigger + snap/rec, tucked IP settings, corner wordmark. They differ in <b>material world</b> and <b>reticle personality</b>. The reticle auto-cycles searching ↔ lock so you can see it move; drag the stick, tap Collect / Snap / Rec, open the gear.</p>
+  </div>
+
+  <div class="row">
+
+    <!-- ============ DIRECTION A ============ -->
+    <div class="col">
+      <div class="col-label">
+        <span class="idx">A</span>
+        <h2>Centre Court</h2>
+        <span class="tag">Tournament table blue</span>
+      </div>
+      <p class="col-note">The sporty read. Pulls the matte <b>tournament blue</b> and chalk-white lines of an ITTF table; Vali's accent <b>orange</b> is the energy. Reticle is a <b>rounded ball-lock</b> — a clean ring that snaps orange and pulls its corner ticks inward when a ball is centred, with a soft intake mouth below that goes green on alignment. Friendly, precise, a touch playful.</p>
+
+      <div class="device">
+        <div class="screen frame dir-a" id="fa">
+          <div class="cam">
+            <div class="sky"></div><div class="bloom"></div>
+            <div class="floor"></div>
+            <div class="table"></div>
+            <i class="ball" style="left:49%;top:62%;width:20px;height:20px;"></i>
+            <i class="ball" style="left:28%;top:74%;width:26px;height:26px;"></i>
+            <i class="ball" style="left:68%;top:70%;width:22px;height:22px;"></i>
+            <i class="ball" style="left:80%;top:84%;width:30px;height:30px;"></i>
+            <i class="ball" style="left:16%;top:88%;width:34px;height:34px;"></i>
+            <div class="vig"></div><div class="grain"></div>
+          </div>
+          <div class="hud">
+            <div class="topbar">
+              <div class="wordmark"><span class="dot"></span><span class="mk">Vali</span><span class="sub">Pilot</span></div>
+              <div class="conn interactive"><span class="led"></span><span class="txt">Linked</span></div>
+              <div class="spacer"></div>
+              <div class="telemetry">
+                <div class="cell"><span class="val" data-lat>28<small>ms</small></span><span class="lab">Latency</span></div>
+                <div class="cell"><span class="val" data-fps>60<small>fps</small></span><span class="lab">Feed</span></div>
+              </div>
+              <div class="battery"><div class="batt-glyph"><div class="batt-fill"></div></div><span class="pct">72%</span></div>
+              <div class="signal"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+              <button class="gear interactive" data-gear aria-label="Robot address settings"><span class="dots"><i></i><i></i><i></i></span></button>
+            </div>
+
+            <div class="ipcard" data-ipcard>
+              <div class="h">Robot Address</div>
+              <input value="192.168.1.42" spellcheck="false" />
+              <div class="mirror"><span>Mirror controls (left-handed)</span><button class="toggle interactive" data-mirror></button></div>
+            </div>
+
+            <div class="reticle ret-a" data-reticle>
+              <div class="status-chip" data-chip>Searching</div>
+              <div class="scan-ring"></div>
+              <div class="lock-ring"></div>
+              <div class="tick tl"></div><div class="tick tr"></div><div class="tick bl"></div><div class="tick br"></div>
+              <div class="ball-dot"></div>
+              <div class="intake" data-intake>
+                <div class="mouth-shape"></div>
+                <div class="track"><div class="center"></div><div class="marker" data-marker></div></div>
+                <div class="ilab">Intake</div>
+              </div>
+            </div>
+
+            <div class="joystick interactive" data-joy>
+              <div class="base"></div>
+              <span class="arrow up"></span><span class="arrow down"></span><span class="arrow left"></span><span class="arrow right"></span>
+              <div class="nub" data-nub></div>
+              <div class="label">Drive</div>
+            </div>
+
+            <div class="actions">
+              <div class="mini-col">
+                <button class="mini interactive" data-snap><span class="ico"><span class="snap-ico"></span></span><span class="mlab">Snap</span></button>
+                <button class="mini interactive" data-rec><span class="ico"><span class="rec-ico"></span></span><span class="mlab">Rec</span></button>
+              </div>
+              <button class="collect interactive" data-collect><span class="mouth"></span><span class="clab">COLLECT</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#1B5FA8"></div><div class="nm">Table Blue</div><div class="hx">#1B5FA8</div></div>
+        <div class="sw"><div class="chip" style="background:#0B1A28"></div><div class="nm">Net Navy</div><div class="hx">#0B1A28</div></div>
+        <div class="sw"><div class="chip" style="background:#F5F6F1"></div><div class="nm">Ball White</div><div class="hx">#F5F6F1</div></div>
+        <div class="sw"><div class="chip" style="background:#FF6A2B"></div><div class="nm">Vali Orange</div><div class="hx">#FF6A2B</div></div>
+        <div class="sw"><div class="chip" style="background:#2FBF71"></div><div class="nm">Lock Green</div><div class="hx">#2FBF71</div></div>
+      </div>
+      <div class="hint">Type · <b>Space Grotesk</b> wordmark / <b>Archivo</b> UI / <b>Spline Sans Mono</b> telemetry</div>
+    </div>
+
+    <!-- ============ DIRECTION B ============ -->
+    <div class="col">
+      <div class="col-label">
+        <span class="idx">B</span>
+        <h2>Service Robot</h2>
+        <span class="tag">Industrial teleop panel</span>
+      </div>
+      <p class="col-note">The instrument read. Looks like a real robotics <b>teleop console</b> — machined slate panels, <b>safety-yellow</b> as the one loud accent, hazard stripes used with restraint. Reticle is an <b>angular machined bracket</b> with a live range readout and converging intake rails. Disciplined, confident, reads instantly in bright gym light.</p>
+
+      <div class="device">
+        <div class="screen frame dir-b" id="fb">
+          <div class="cam">
+            <div class="sky"></div><div class="bloom"></div>
+            <div class="floor"></div>
+            <div class="table"></div>
+            <i class="ball" style="left:49%;top:62%;width:20px;height:20px;"></i>
+            <i class="ball" style="left:28%;top:74%;width:26px;height:26px;"></i>
+            <i class="ball" style="left:68%;top:70%;width:22px;height:22px;"></i>
+            <i class="ball" style="left:80%;top:84%;width:30px;height:30px;"></i>
+            <i class="ball" style="left:16%;top:88%;width:34px;height:34px;"></i>
+            <div class="vig"></div><div class="grain"></div>
+          </div>
+          <div class="hud">
+            <div class="topbar">
+              <div class="wordmark"><span class="dot"></span><span class="mk">Vali</span><span class="sub">Teleop</span></div>
+              <div class="conn interactive"><span class="led"></span><span class="txt">Online</span></div>
+              <div class="spacer"></div>
+              <div class="telemetry">
+                <div class="cell"><span class="val" data-lat>31<small>ms</small></span><span class="lab">Latency</span></div>
+                <div class="cell"><span class="val" data-fps>59<small>fps</small></span><span class="lab">Feed</span></div>
+              </div>
+              <div class="battery"><div class="batt-glyph"><div class="batt-fill"></div></div><span class="pct">72%</span></div>
+              <div class="signal"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+              <button class="gear interactive" data-gear aria-label="Robot address settings"><span class="dots"><i></i><i></i><i></i></span></button>
+            </div>
+
+            <div class="ipcard" data-ipcard>
+              <div class="h">Robot Address</div>
+              <input value="10.0.0.7" spellcheck="false" />
+              <div class="mirror"><span>Mirror controls (left-handed)</span><button class="toggle interactive" data-mirror></button></div>
+            </div>
+
+            <div class="reticle ret-b" data-reticle>
+              <div class="status-chip" data-chip>Tracking</div>
+              <div class="range">1.24<small>m</small></div>
+              <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+              <div class="cross"></div>
+              <div class="hazard"></div>
+              <div class="intake" data-intake>
+                <div class="mouth-shape"></div>
+                <div class="track"><div class="center"></div><div class="marker" data-marker></div></div>
+                <div class="ilab">Intake align</div>
+              </div>
+            </div>
+
+            <div class="joystick interactive" data-joy>
+              <div class="base"></div>
+              <span class="arrow up"></span><span class="arrow down"></span><span class="arrow left"></span><span class="arrow right"></span>
+              <div class="nub" data-nub></div>
+              <div class="label">Drive</div>
+            </div>
+
+            <div class="actions">
+              <div class="mini-col">
+                <button class="mini interactive" data-snap><span class="ico"><span class="snap-ico"></span></span><span class="mlab">Snap</span></button>
+                <button class="mini interactive" data-rec><span class="ico"><span class="rec-ico"></span></span><span class="mlab">Rec</span></button>
+              </div>
+              <button class="collect interactive" data-collect><span class="mouth"></span><span class="clab">COLLECT</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#11151A"></div><div class="nm">Console Slate</div><div class="hx">#11151A</div></div>
+        <div class="sw"><div class="chip" style="background:#2A323B"></div><div class="nm">Machined Gray</div><div class="hx">#2A323B</div></div>
+        <div class="sw"><div class="chip" style="background:#FFC400"></div><div class="nm">Safety Yellow</div><div class="hx">#FFC400</div></div>
+        <div class="sw"><div class="chip" style="background:#ECEFEA"></div><div class="nm">Bone White</div><div class="hx">#ECEFEA</div></div>
+        <div class="sw"><div class="chip" style="background:#3FB6C9"></div><div class="nm">Sensor Teal</div><div class="hx">#3FB6C9</div></div>
+        <div class="sw"><div class="chip" style="background:#E5484D"></div><div class="nm">Alert Red</div><div class="hx">#E5484D</div></div>
+      </div>
+      <div class="hint">Type · <b>Archivo</b> heavy display + UI / <b>Spline Sans Mono</b> telemetry</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  document.querySelectorAll(".frame").forEach(function (frame) {
+    /* ---- joystick ---- */
+    var joy = frame.querySelector("[data-joy]");
+    var nub = frame.querySelector("[data-nub]");
+    if (joy && nub) {
+      var R = 40, active = false;
+      function setNub(dx, dy) {
+        var d = Math.hypot(dx, dy);
+        if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+        nub.style.transform = "translate(" + dx + "px," + dy + "px)";
+      }
+      function fromEvent(e) {
+        var r = joy.getBoundingClientRect();
+        var p = e.touches ? e.touches[0] : e;
+        setNub(p.clientX - (r.left + r.width / 2), p.clientY - (r.top + r.height / 2));
+      }
+      function start(e) { active = true; joy.classList.add("dragging"); fromEvent(e); e.preventDefault(); }
+      function move(e) { if (active) fromEvent(e); }
+      function end() { active = false; joy.classList.remove("dragging"); nub.style.transform = "translate(0,0)"; }
+      joy.addEventListener("pointerdown", start);
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end);
+    }
+
+    /* ---- collect trigger ---- */
+    var collect = frame.querySelector("[data-collect]");
+    if (collect) collect.addEventListener("click", function () {
+      if (reduce) return;
+      collect.classList.remove("ping"); void collect.offsetWidth; collect.classList.add("ping");
+    });
+
+    /* ---- rec toggle ---- */
+    var rec = frame.querySelector("[data-rec]");
+    if (rec) rec.addEventListener("click", function () { rec.classList.toggle("recording"); });
+
+    /* ---- gear / IP popover ---- */
+    var gear = frame.querySelector("[data-gear]");
+    var card = frame.querySelector("[data-ipcard]");
+    if (gear && card) {
+      gear.addEventListener("click", function (e) { e.stopPropagation(); card.classList.toggle("open"); });
+      card.addEventListener("click", function (e) { e.stopPropagation(); });
+      frame.addEventListener("click", function () { card.classList.remove("open"); });
+    }
+    var mirror = frame.querySelector("[data-mirror]");
+    if (mirror) mirror.addEventListener("click", function () { mirror.classList.toggle("on"); });
+
+    /* ---- reticle lock cycle + intake marker ---- */
+    var reticle = frame.querySelector("[data-reticle]");
+    var chip = frame.querySelector("[data-chip]");
+    var intake = frame.querySelector("[data-intake]");
+    var marker = frame.querySelector("[data-marker]");
+    var isB = frame.classList.contains("dir-b");
+    if (reticle) {
+      if (reduce) {
+        reticle.classList.add("locked");
+        if (chip) chip.textContent = isB ? "Aligned" : "Lock on";
+        if (intake) intake.classList.add("aligned");
+        if (marker) marker.style.left = "50%";
+      } else {
+        var locked = false;
+        // drift the intake marker while searching
+        var t = 0;
+        setInterval(function () {
+          if (locked || !marker) return;
+          t += 0.08;
+          marker.style.left = (50 + Math.sin(t) * 34) + "%";
+        }, 60);
+        setInterval(function () {
+          locked = !locked;
+          reticle.classList.toggle("locked", locked);
+          if (chip) chip.textContent = locked ? (isB ? "Aligned" : "Lock on") : (isB ? "Tracking" : "Searching");
+          if (intake) intake.classList.toggle("aligned", locked);
+          if (locked && marker) marker.style.left = "50%";
+        }, 2600);
+      }
+    }
+
+    /* ---- gentle telemetry flicker ---- */
+    if (!reduce) {
+      var lat = frame.querySelector("[data-lat]");
+      var fps = frame.querySelector("[data-fps]");
+      setInterval(function () {
+        if (lat) lat.innerHTML = (26 + Math.floor(Math.random() * 9)) + "<small>ms</small>";
+        if (fps) fps.innerHTML = (58 + Math.floor(Math.random() * 3)) + "<small>fps</small>";
+      }, 1400);
+    }
+  });
+})();
+</script>
+</body>
+</html>

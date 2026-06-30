@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vali mark: a bright table-tennis ball on net-navy. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#0B1A28" android:pathData="M0,0h108v108h-108z" />
+    <path android:fillColor="#FF6A2B"
+        android:pathData="M30,54 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85"
+        android:pathData="M44,46 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+</vector>
